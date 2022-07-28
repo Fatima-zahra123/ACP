@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<meta name="progressive" content="true" />
+<meta name="allow-skip" content="true" />
+
+<title>Lab: AFC</title>
+
+
+<!-- highlightjs -->
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+<!-- taken from https://github.com/rstudio/rmarkdown/blob/67b7f5fc779e4cfdfd0f021d3d7745b6b6e17149/inst/rmd/h/default.html#L296-L362 -->
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("section-TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+<!-- end tabsets -->
+
+
+
+</head>
+
+<body>
+
+
+
+<div class="pageContent band">
+<div class="bandContent page">
+
+<div class="topics">
+
+<div id="section-introduction" class="section level2">
+<h2><strong>Introduction</strong></h2>
+<p>Dans le Lab actuel, nous allons montrer comment calculer et interpréter l’analyse factorielle des correspondances à l’aide de deux packages du programme <code>R</code> :<br />
+<code>FactoMiner</code> pour l’analyse<br />
+<code>factoextra</code> pour la visualisation des données.<br />
+<code>gplots</code>, <code>graphics</code> et <code>corrplot</code> aussi pour la visualisation.<br />
+De plus, nous montrerons comment révéler les variables les plus importantes qui expliquent les variations d’un ensemble de données.<br />
+Nous continuons en expliquant comment appliquer l’analyse des correspondances à l’aide de lignes et de colonnes supplémentaires, c’est important, si vous voulez faire des prédictions avec l’AFC.<br />
+Les dernières sections de ce lab décrivent également comment filtrer les résultats de l’AFC afin de ne conserver que les variables qui contribuent le plus. Enfin, nous verrons comment traiter les valeurs aberrantes.</p>
+</div>
+<div id="section-lecture-des-données" class="section level2">
+<h2><strong>Lecture des données</strong></h2>
+<div class="tutorial-exercise" data-label="Load-packages" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="Load-packages-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>library(FactoMineR)  
+library(factoextra)
+library(corrplot)
+library(gplots)
+library(graphics)</code></pre>
+</div>
+<p>Les données devraient être sous forme d’un tableau de contingence. Nous utiliserons le jeu de données de démonstration <code>housetasks</code> disponibles dans le package factoextra <code>R</code>.<br />
+tapez <code>data(housetasks)</code> pour charger le jeu de données en question</p>
+<p>Pour avoir un aperçu sur les données, utiliser les fonction suivantes:<br />
+<code>str()</code>pour afficher un listing de toutes les variables et de leurs types<br />
+<code>head()</code> pour afficher les 6 premières lignes<br />
+<code>tail</code> pour afficher les 6 dernières lignes<br />
+<code>rownames()</code> pour afficher les noms des lignes</p>
+<div class="tutorial-exercise" data-label="print-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="print-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>data(housetasks)
+str(housetasks)
+head(housetasks)
+tail(housetasks)
+colnames(housetasks)</code></pre>
+</div>
+<p>Le jeu de données est un tableau de contingence contenant 13 tâches domestiques et leur répartition dans le couple.<br />
+Les lignes sont les différentes tâches:<br />
+les valeurs sont les fréquences des tâches effectuées:<br />
+par la femme<br />
+par alternance<br />
+par le mari<br />
+conjointement</p>
+</div>
+<div id="section-graphique-des-tableaux-de-contingence-et-test-du-khi-deux" class="section level2">
+<h2><strong>Graphique des tableaux de contingence et test du khi-deux</strong></h2>
+<div id="section-affichage-graphique-des-tableaux-de-contingence" class="section level3">
+<h3><strong>Affichage graphique des tableaux de contingence</strong></h3>
+<p>Le tableau de contingence peut être visualisé en utilisant la fonction <code>balloonplot()</code> dans le package <code>gplots</code>. Cette fonction trace une matrice graphique où chaque cellule contient un point dont la taille est relative de sa valeur correspondante.<br />
+Le graphique pourrait être transposé selon le besoin en transposant le tableau de données par la fonction <code>t(data)</code>.</p>
+<div class="tutorial-exercise" data-label="plot-tasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":8,"fig.height":6,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":768,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="plot-tasks-hint-1" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>dt &lt;- as.table(as.matrix(housetasks)) # convertir les données en matrice
+balloonplot(dt, main =&quot;housetasks&quot;, label = FALSE, show.margins = FALSE)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="plot-tasks-hint-2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>dt &lt;- as.table(as.matrix(housetasks)) # convertir les données en matrice
+balloonplot(t(dt), main =&quot;housetasks&quot;, label = FALSE, show.margins = FALSE)</code></pre>
+</div>
+<p>Remarque: Notez que les sommes des lignes et des colonnes sont reportées par défaut dans les marges inférieure et droite, Ces valeurs sont masquées en utilisant l’argument <code>show.margins = FALSE</code> (supprimer l’argument pour voir la différence).</p>
+<p>Il est également possible de visualiser une table de contingence comme un tracé en mosaïque. Ceci est fait en utilisant la fonction <code>mosaicplot()</code> du package <code>garphics</code>:</p>
+<div class="tutorial-exercise" data-label="plot2-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":8,"fig.height":6,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":768,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="plot2-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>mosaicplot(dt, shade = TRUE, las=2, main = &quot;housetasks&quot;)</code></pre>
+</div>
+<p>l’argument <code>shade</code> est utilisé pour colorer le graphique<br />
+L’argument <code>las = 2</code> produit des étiquettes verticales</p>
+<p>Notez que la surface d’un élément de la mosaïque reflète l’importance relative de sa valeur.</p>
+<p>La couleur bleue indique que la valeur observée est supérieure à la valeur théorique dans le cas de l’indépendance<br />
+La couleur rouge indique que la valeur observée est inférieure à la valeur théorique dans le cas de l’indépendance</p>
+<p>De ce graphique de mosaïque, on peut voir que les “housetasks Laundry”, “Main_meal”, “Dinner” et “breakfeast” (couleur bleue) sont principalement effectuées par la femme dans notre exemple.</p>
+</div>
+<div id="section-test-de-khi-deux" class="section level3">
+<h3><strong>Test de khi-deux</strong></h3>
+<p>Le test du chi-deux permet de déterminer si les lignes et les colonnes d’un tableau de contingence sont associées de façon statistiquement significative.</p>
+<p>Hypothèse nulle <span class="math inline">\((H_0)\)</span>: les variables de ligne et de colonne de la table de contingence sont indépendantes.<br />
+Hypothèse alternative <span class="math inline">\((H_1)\)</span>: les variables des lignes et des colonnes sont dépendantes.</p>
+<p>La statistique du khi-deux peut être facilement calculée à l’aide de la fonction <code>chisq.test()</code>. Nommez le résultat (htasks_chisq par exemple) pour faciliter son exploitation par la suite.</p>
+<p>En appliquant la fonction <code>str()</code> sur <code>htasks_chisq</code>, vous saurez accédez aux effectifs observés et théoriques via l’opérateur <code>$</code>.</p>
+<div class="tutorial-exercise" data-label="Kh2-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="Kh2-htasks-hint-1" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>htasks_chisq &lt;- chisq.test(housetasks)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="Kh2-htasks-hint-2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>htasks_chisq$observed
+htasks_chisq$expected</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="Kh2-htasks-hint-3" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>round(htasks_chisq$expected,2)</code></pre>
+</div>
+<p>La fonction <code>round(x, digits = ...)</code> s’utilise pour arrondir un nombre <code>x</code> au nombre de décimales spécifié (0 par défaut).</p>
+<p>Les résidus de Pearson <span class="math inline">\((\frac{(Eff.Observés - Eff.Théoriques)}{\sqrt(Eff.Théoriques)})\)</span> peuvent être aussi extraits facilement de <code>htasks_chisq</code> via l’opérateur <code>$</code></p>
+<div class="tutorial-exercise-support" data-label="prep-Kh2-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>htasks_chisq &lt;- chisq.test(housetasks)</code></pre>
+</div>
+<div class="tutorial-exercise" data-label="res-Kh2-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"prep-Kh2-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="res-Kh2-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>htasks_chisq$residuals</code></pre>
+</div>
+<p>Les cellules ayant les résidus normalisés absolus les plus élevés contribuent le plus au score du khi-deux total; ie contribuent le plus à l’écart de l’indépendance.</p>
+<p>Les résidus de Pearson peuvent être visualisés en utilisant la fonction <code>corrplot</code> du <code>corrplot</code> package</p>
+<div class="tutorial-exercise" data-label="plot-res-Kh2-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":8,"fig.height":6,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":768,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"prep-Kh2-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="plot-res-Kh2-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>library(corrplot)
+corrplot(htasks_chisq$residuals, is.cor = FALSE)</code></pre>
+</div>
+<p>Pour une cellule donnée, la taille du cercle est proportionnelle à la contribution à l’écart de l’indépendance.</p>
+<p>Le signe des résidus normalisés est également très important pour interpréter l’association entre les lignes et les colonnes:</p>
+<p>Les résidus positifs sont en bleu. Les valeurs positives dans les cellules spécifient une attraction (association positive) entre les modalités de ligne et de colonne correspondantes.</p>
+<p>Dans le graphique ci-dessus, il est évident qu’il y a une association entre la colonne <strong>Wife</strong> et les lignes <strong>Laundry</strong> et <strong>Main_meal</strong>.</p>
+<p>Il y a une forte association positive entre la colonne <strong>Husband</strong> et la rangée <strong>Repair</strong></p>
+<p>Les résidus négatifs sont en rouge. Cela implique un repoussement (association négative) entre les modalités de ligne et de colonne correspondantes.<br />
+Par exemple, la colonne <strong>Wife</strong> est négativement associée à la ligne <strong>Repairs</strong> .<br />
+Il y a aussi un repoussement entre la colonne <strong>Husband</strong> et, les lignes <strong>Laundry</strong> et <strong>Main_meal</strong>.</p>
+<p>Les contributions (en <span class="math inline">\(\%\)</span>) des cellules au score total du khi-deux sont calculées comme suit : <span class="math display">\[\frac{Résidus^2}{\chi^2}\]</span></p>
+<p>Calculer ces contributions et tracer les en utilisant la fonction <code>corrplot</code></p>
+<div class="tutorial-exercise" data-label="plot-cont-Kh2-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":10,"fig.height":6,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":960,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"prep-Kh2-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="plot-cont-Kh2-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>contrib &lt;- 100*htasks_chisq$residuals^2/htasks_chisq$statistic  
+round(contrib, 2)  
+corrplot(contrib, is.cor = FALSE)</code></pre>
+</div>
+<p>On peut constater que:</p>
+<p>La colonne <strong>Wife</strong> est fortement associée à <strong>Laundry</strong> <span class="math inline">\((7,74\%)\)</span> et <strong>Main_meal</strong> <span class="math inline">\((4,98\%)\)</span>, _<strong>Dinner</strong> La colonne <strong>Husband</strong> est fortement associée à <strong>Repairs</strong> <span class="math inline">\((21,9\%)\)</span> La colonne <strong>jointly</strong> est fréquemment associée à <strong>Holidays</strong> <span class="math inline">\((12,44\%)\)</span></p>
+<p>Ces cellules contribuent à hauteur d’environ <span class="math inline">\(47,06\%\)</span> au score total de khi-deux et représentent donc la majeure partie de la différence entre les valeurs théoriques et observées.</p>
+<p>Cela confirme l’interprétation visuelle antérieure des données. Comme il a été mentionné précédemment, l’interprétation visuelle peut être complexe lorsque le tableau de contingence est très volumineux. Dans ce cas, la contribution d’une cellule au score total khi-deux devient un moyen utile pour établir la nature de la dépendance.</p>
+</div>
+</div>
+<div id="section-le-code-r-pour-lafc" class="section level2">
+<h2><strong>Le code R pour l’AFC</strong></h2>
+<p>Le calcul peut se faire avec la fonction <code>CA</code> du package <code>FactoMiner</code>, la forme générale est comme suit:<br />
+<span class="math display">\[CA(X, ncp = ... , graph = ...)\]</span></p>
+<ul>
+<li>X : un jeu de données (tableau de contingence)</li>
+<li>ncp : nombre de dimensions conservées dans les résultats finaux.</li>
+<li>graph : une valeur logique (TRUE or FALSE).</li>
+</ul>
+<p>Lancer les calcules relatif à l’AFC du jeu de données <code>housetasks</code> sans spécifier <code>np</code> et avec <code>graph=FALSE</code>, Nommez le résultat (htasks.afc par exemple). Puis exolicitez les éléments de <code>htasks.afc</code> en tapant <code>print(res.ca).</code></p>
+<div class="tutorial-exercise" data-label="AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="AFC-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>htasks.afc &lt;- CA(housetasks, graph = FALSE)</code></pre>
+</div>
+</div>
+<div id="section-visualisation-et-interprétation" class="section level2">
+<h2><strong>Visualisation et interprétation</strong></h2>
+<div class="tutorial-exercise-support" data-label="sp-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>htasks.afc &lt;- CA(housetasks, graph = FALSE)</code></pre>
+</div>
+<p>Nous utiliserons les fonctions suivantes du package<code>factoextra</code> pour faciliter l’interprétation et la visualisation du résultat de l’AFC; à savoir <code>htasks.afc</code>:</p>
+<ul>
+<li><code>get_eigenvalue(htasks.afc)</code>: Extraire les valeurs propres/variances retenues par chaque dimension (axe)<br />
+</li>
+<li><code>fviz_eig(htasks.afc)</code>: Visualiser les valeurs propres</li>
+<li><code>get_ca_row(htasks.afc)</code>, <code>get_ca_col(htasks.afc)</code>: Extrait les résultats des lignes et des colonnes, respectivement.</li>
+<li><code>fviz_ca_row(htasks.afc)</code>, <code>fviz_ca_col(htasks.afc)</code>: Visualisez les résultats pour les lignes et les colonnes, respectivement.</li>
+<li><code>fviz_ca_biplot(htasks.afc)</code>: Crée un graphique superposé des lignes et des colonnes.</li>
+</ul>
+<div id="section-valeurs-propresvariances-retenues" class="section level3">
+<h3><strong>Valeurs propres/Variances retenues</strong></h3>
+<p>Afficher les valeurs propres des dimensions de l’AFC</p>
+<div class="tutorial-exercise" data-label="ev-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"sp-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="ev-AFC-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>eig.val &lt;- get_eigenvalue(htasks.afc)
+eig.val</code></pre>
+</div>
+<p>Les valeurs propres correspondent à la quantité d’informations conservées par chaque axe. Les dimensions sont ordonnées de façon décroissante et listées en fonction de la quantité de variance retenue.</p>
+<p>Les valeurs propres peuvent être utilisées pour déterminer le nombre d’axes à retenir. Il n’y a pas de règle empirique pour choisir le nombre de dimensions à retenir. Cela dépend de la question de recherche et des besoins du chercheur.</p>
+<p>Une autre alternative pour déterminer le nombre de dimensions est d’examiner le graphique des valeurs propres/variances ordonnées du plus grand au plus petit. Le nombre de composantes est déterminé au point au-delà duquel les valeurs propres restantes sont toutes relativement petites et de taille comparable.</p>
+<p>Tracer ledit graphique en utilisant la fonction <code>fviz_eig()</code> ou <code>fviz_screeplot()</code> du package <code>factoextra</code>.</p>
+<div class="tutorial-exercise" data-label="viz-ev-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"sp-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="viz-ev-AFC-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>fviz_screeplot(htasks.afc, addlabels = TRUE, ylim = c(0, 50))</code></pre>
+</div>
+<p>Les dimensions 1 et 2 expliquent respectivement environ 48,7% et 39,9% de l’inertie totale. Cela correspond à un total cumulé de 88,6% de l’inertie totale retenue par les 2 dimensions.</p>
+</div>
+<div id="section-le-graphique-superposé-des-lignes-et-colonnes" class="section level3">
+<h3><strong>Le graphique superposé des lignes et colonnes</strong></h3>
+<p>Tracer le graphique superposé des profils lignes et des profils colonnes en appliquant la fonction <code>fviz_ca_biplot()</code> sur l’objet <code>htasks.afc</code></p>
+<div class="tutorial-exercise" data-label="viz-supp-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"sp-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="viz-supp-AFC-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>fviz_ca_biplot(htasks.afc, repel = TRUE)</code></pre>
+</div>
+<p>Le graphique ci-dessus montre les tendances principales dans les données. Les lignes sont représentées par des points bleus et des colonnes par des triangles rouges. La distance entre les points ligne ou entre les points colonne donne une mesure de leur similitude (ou dissimilarité).<br />
+Les points ligne ayant un profil similaire sont proches sur le plan des facteurs. Il en va de même pour les points de colonne.</p>
+<p>Ce graphique montre que:<br />
+- les tâches internes comme <strong>dinner</strong>, <strong>breakfeast</strong>, <strong>laundry</strong> sont effectuées plus souvent par <strong>wife</strong><br />
+- <strong>Driving</strong> et <strong>repairs</strong> sont effectuées par le <strong>husband</strong><br />
+- …</p>
+</div>
+<div id="section-graphique-des-profils-ligne" class="section level3">
+<h3><strong>Graphique des profils ligne</strong></h3>
+<p>Appliquer la fonction <code>get_ca_row()</code> sur l’objet <code>htasks.afc</code> pour extraire les résultats des profils ligne.<br />
+Cette fonction retourne une liste contenant les coordonnées, le cos2, la contribution et l’inertie des des profils lign.</p>
+<div class="tutorial-exercise" data-label="ligne-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"sp-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="ligne-AFC-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>row &lt;- get_ca_row(htasks.afc)
+row</code></pre>
+</div>
+<p>Les composants de la fonction <code>get_ca_row()</code> peuvent être utilisés pour tracer et analyser les profils ligne comme suit :<br />
+- <code>row$coord</code> : coordonnées de chaque point ligne dans chaque dimension (1, 2 et 3). Utilisé pour créer le diagramme de dispersion.<br />
+- <code>row$cos2</code> : qualité de la représentation des profils ligne.<br />
+- <code>var$contrib</code>: contribution des lignes (en <span class="math inline">\(\%\)</span>) à la définition des dimensions.</p>
+<div id="section-coordonnées-des-points-ligne" class="section level4">
+<h4><strong>Coordonnées des points ligne</strong></h4>
+<p>Jeter un coup d’oeil sur <code>row$coord</code> puis tracer uniquement les points ligne en utilisant la fonction <code>fviz_ca_row()</code> sur l’objet <code>htasks.afc</code>.</p>
+<div class="tutorial-exercise" data-label="coord-ligne-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"sp-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="coord-ligne-AFC-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>fviz_ca_row(htasks.afc)</code></pre>
+</div>
+<p>Le graphique ci-dessus montre les relations entre les profils ligne :</p>
+<ul>
+<li>Les lignes ayant un profil similaire sont regroupées.<br />
+</li>
+<li>Les lignes corrélées négativement sont positionnées sur les côtés opposés de l’origine du tracé (quadrants opposés).<br />
+</li>
+<li>La distance entre les points ligne et l’origine mesure la qualité de représentation des points ligne sur le plan des facteurs.<br />
+</li>
+<li>Les points ligne éloignés de l’origine sont bien représentés sur le plan des facteurs.</li>
+</ul>
+</div>
+<div id="section-qualité-de-représentation-des-point-ligne" class="section level4">
+<h4><strong>Qualité de représentation des point ligne</strong></h4>
+<div class="tutorial-exercise-support" data-label="sp2-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>htasks.afc &lt;- CA(housetasks, graph = FALSE)
+row &lt;- get_ca_row(htasks.afc)</code></pre>
+</div>
+<p>Le <code>cos2</code> mesure le degré d’association entre les profils lignes/colonnes et un axe particulier. Les valeurs du <code>cos2</code> sont comprises entre 0 et 1, la somme des <code>cos2</code> pour chaque ligne sur toutes les dimensions de l’AFC est égale à 1.Si un profil ligne est bien représenté par deux dimensions, la somme des cos2 sur les deux dimension est proche de 1.<br />
+Afficher Les <code>cos2</code> des profils ligne en tapant <code>row$cos2</code>, puis visualiser graphiquement <code>row$cos2</code>en utilisant la fonction <code>corrplot</code>.</p>
+<div class="tutorial-exercise" data-label="qty-ligne-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"sp2-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="qty-ligne-AFC-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>row$cos2
+corrplot(row$cos2, is.corr=FALSE)</code></pre>
+</div>
+<p>Notez que tous les profils ligne sont bien représentés par les deux premières dimensions sauf le profil Officiel qui est bien représenté par la troisième dimension.</p>
+<p>Il est possible de colorer les points sur le graphique des Coordonnées des points ligne par leurs valeurs cos2 en utilisant l’argument <code>col.row = "cos2"</code>. Ceci produit des couleurs dégradé, qui peuvent être personnalisées en utilisant l’argument <code>gradient.cols</code>. Par exemple, <code>gradient.cols = c("white", "blue", "red")</code>.</p>
+<div class="tutorial-exercise" data-label="cos-ligne-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>fviz_ca_row(htasks.afc, col.row = &quot;cos2&quot;, gradient.cols = c(&quot;#00AFBB&quot;, &quot;#E7B800&quot;, &quot;#FC4E07&quot;), repel = TRUE)</code></pre>
+<img src="AFC-TP1-V2_files/figure-html/cos-ligne-AFC-htasks-1.png" width="624" />
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"sp2-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+</div>
+<div id="section-contribution-des-profils-ligne-aux-dimensions" class="section level4">
+<h4><strong>Contribution des profils ligne aux dimensions</strong></h4>
+<p>Les profils ligne qui contribuent le plus à Dim.1 et Dim.2 sont les plus importantes pour expliquer la variabilité de l’ensemble de données dans le plan défini par les deux dimensions.</p>
+<p>Les profils ligne qui ne contribuent pas beaucoup ni à Dim.1 ni à Dim.2 ou qui contribuent le plus à la dernière dimension sont moins importantes.</p>
+<p>Afficher les contributions <code>row$contrib</code> puis utiliser la fonction <code>corrplot()</code> pour mettre en évidence les points ligne les plus contributifs pour chaque dimension.</p>
+<div class="tutorial-exercise" data-label="ctr-ligne-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"sp2-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="ctr-ligne-AFC-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>row$contrib
+corrplot(row$contrib, is.corr=FALSE)</code></pre>
+</div>
+<p>Si vos données contiennent de nombreuses lignes, vous pouvez décider de n’afficher que les premières lignes contributives.Dans ce sens, la fonction <code>fviz_contrib()</code> peut être utilisée pour dessiner diagramme en bâton de contributions de lignes. Le code R ci-dessous indique les 10 première profils ligne qui contribuent aux dimensions:</p>
+<div class="tutorial-exercise" data-label="10-ctr-ligne-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>fviz_contrib(htasks.afc, choice = &quot;row&quot;, axes = 1, top = 10)    </code></pre>
+<p><img src="AFC-TP1-V2_files/figure-html/10-ctr-ligne-AFC-htasks-1.png" width="624" /></p>
+<pre class="text"><code>fviz_contrib(htasks.afc, choice = &quot;row&quot;, axes = 2, top = 10)</code></pre>
+<img src="AFC-TP1-V2_files/figure-html/10-ctr-ligne-AFC-htasks-2.png" width="624" />
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"sp2-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<p>On peut voir que: - Les profils ligne <strong>Repairs</strong>, <strong>Laundry</strong>, <strong>Main_meal</strong> et <strong>Driving</strong> sont les plus importants dans la définition de la première dimension.<br />
+- Les profils lignes <strong>Holidays</strong> et <strong>Repairs</strong> contribuent le plus à la dimension 2.</p>
+<p>Les profils lignes les plus importants (ou contributifs) peuvent être mis en évidence sur le diagramme des coordonnées comme suit:</p>
+<div class="tutorial-exercise" data-label="contrib-ligne-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>fviz_ca_row(htasks.afc, col.row = &quot;contrib&quot;, gradient.cols = c(&quot;#00AFBB&quot;, &quot;#E7B800&quot;, &quot;#FC4E07&quot;), repel = TRUE)</code></pre>
+<img src="AFC-TP1-V2_files/figure-html/contrib-ligne-AFC-htasks-1.png" width="624" />
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"sp2-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+</div>
+</div>
+<div id="section-graphique-des-profils-colonne" class="section level3">
+<h3><strong>Graphique des profils colonne</strong></h3>
+<p>Appliquer la fonction <code>get_ca_col()</code> sur l’objet <code>htasks.afc</code> pour extraire les résultats des profils colonne. Nommer le résultat <code>col</code> .</p>
+<div class="tutorial-exercise" data-label="col-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"sp-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="col-AFC-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>col &lt;- get_ca_col(htasks.afc)
+col</code></pre>
+</div>
+<p>Afficher les coordonnées des profils colonne, leurs qualités de représentation, leurs contributions ainsi que leurs inerties.</p>
+<div class="tutorial-exercise-support" data-label="spc-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>htasks.afc &lt;- CA(housetasks, graph = FALSE)  
+col&lt;- get_ca_col(htasks.afc)</code></pre>
+</div>
+<div class="tutorial-exercise" data-label="col2-AFC-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"spc-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div id="section-coordonnées-des-points-colonne" class="section level4">
+<h4><strong>Coordonnées des points colonne</strong></h4>
+<p>Tracer les points colonne en utilisant la fonction <code>fviz_ca_col()</code></p>
+<div class="tutorial-exercise" data-label="viz-col-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":8,"fig.height":6,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":768,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"spc-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="viz-col-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>fviz_ca_col(htasks.afc)</code></pre>
+</div>
+</div>
+<div id="section-visualisation-de-la-qualité-de-représentation-des-points-colonne" class="section level4">
+<h4><strong>Visualisation de la qualité de représentation des points colonne</strong></h4>
+<p>Visualiser graphiquement la qualité de représentation des points colonne <code>col$cos2</code> en utilisant la fonction <code>corrplot</code></p>
+<div class="tutorial-exercise" data-label="qty-col-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"spc-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="qty-col-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>corrplot(col$cos2, is.corr=FALSE)</code></pre>
+</div>
+<p>Sachant que la fonction <code>rowsum</code> permet d’additionner les colonnes d’une matrice, calculer la qualité de représentation globale pour chaque profil colonne sur le plan défini par les deux premières dimensions.</p>
+<div class="tutorial-exercise" data-label="qty2-col-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"spc-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="qty2-col-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>rowSums(col$cos2[,1:2])</code></pre>
+</div>
+<p>Utiliser la fonction <code>fviz_cos2( ... ,choice = "col", axes = 1:2)</code> pour dessiner un diagramme en bâton représentatnt la qualité de représentation des profils colonne sur le plan défini par les deux premières dimensions.</p>
+<div class="tutorial-exercise" data-label="viz-qty-col-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"spc-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="viz-qty-col-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>fviz_cos2(htasks.afc, choice = &quot;col&quot;, axes = 1:2)</code></pre>
+</div>
+<p>Il est à noter que tous les profils colonne sont très bien représentés sur le plan défini par les deux premières dimensions sauf le profil de la modalité <span class="math inline">\(Alternating\)</span> qui doit être interprété avec beaucoup de précaution sur ce plan.</p>
+</div>
+<div id="section-visualisation-des-contributions-des-points-colonne" class="section level4">
+<h4><strong>Visualisation des contributions des points colonne</strong></h4>
+<p>Visualiser graphiquement les contributions des points colonne <code>col$contrib</code> en utilisant la fonction <code>corrplot</code></p>
+<div class="tutorial-exercise" data-label="crt-col-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"spc-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="crt-col-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>corrplot(col$contrib, is.corr=FALSE)</code></pre>
+</div>
+<p>Utiliser la fonction <code>fviz_contrib( ... ,choice = "col", axes = 1:2)</code> pour dessiner un diagramme en bâton représentatnt les contributions des profils colonne sur le plan défini par les deux premières dimensions.</p>
+<div class="tutorial-exercise" data-label="viz-crt-col-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"spc-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="viz-crt-col-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>fviz_contrib(htasks.afc, choice = &quot;col&quot;, axes = 1:2)</code></pre>
+</div>
+<p>Il est à noter que tous les profils colonne affichent des contributions qui dépassent la contribution moyenne (1/nombre de profils colonne × 100 = <span class="math inline">\(25\%\)</span>), sauf le profil de la modalité <span class="math inline">\(Alternating\)</span> dont la contribution est quasiment négligeable.</p>
+</div>
+<div id="section-biplot-asymétrique" class="section level4">
+<h4><strong>Biplot asymétrique</strong></h4>
+<p>Comme mentionné ci-dessus, le graphique standard de l’analyse factorielle des correspondances est un biplot symétrique (représentation superposée) ou les distances entre les lignes et les colonnes ne peuvent pas être interprétée. Seules les tendances et des conclusions générales peuvent être tirées.</p>
+<pre class="r"><code>fviz_ca_biplot(htasks.afc, repel = TRUE)</code></pre>
+<p><img src="AFC-TP1-V2_files/figure-html/viz2-asym-htasks-1.png" width="624" /></p>
+<p>Pour interpréter la distance entre les points colonnes et les points lignes, le moyen le plus simple est de créer un biplot asymétrique.</p>
+<p>Pour créer un <strong>biplot asymétrique standard</strong>, utilisez la fonction <code>fviz_ca_biplot()</code> en ajoutant les arguments <code>map = "rowprincipal"</code> pour préciser que les colonnes seront représentées dans l’espace des lignes, et l’argument <code>arrow = c(TRUE, TRUE)</code> pour spécifier que le graphique doit contenir des flèches.</p>
+<div class="tutorial-exercise" data-label="viz-asym-htasks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":true,"message":true,"exercise.df_print":"paged","exercise.timelimit":60,"exercise.setup":"spc-AFC-htasks","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="viz-asym-htasks-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>fviz_ca_biplot (htasks.afc, map = &quot;rowprincipal&quot;, arrow = c(TRUE, TRUE), repel = TRUE)</code></pre>
+</div>
+<p>Un biplot asymétrique est le moyen le plus simple pour interpréter la distance entre les points colonne et les points ligne. En effet, si l’angle entre deux flèches est aigu, alors il y a une forte association entre la ligne et les colonne correspondantes.</p>
+</div>
+<div id="section-travail-à-faire" class="section level4">
+<h4><strong>Travail à faire</strong></h4>
+Sur la base des résultats obtenus tout au long de ce TP, rédigez une synthèse sur la répartition des tâches ménagère dans le couple 
+<script type="application/shiny-prerendered" data-context="server-start">
+library(learnr)
+library(tidyverse)
+library(nycflights13)
+library(Lahman)
+library(FactoMineR)
+library(factoextra)
+library(Hmisc)
+library(corrplot)
+dt <- as.table(as.matrix(housetasks))
+tutorial_options(exercise.timelimit = 60)
+knitr::opts_chunk$set(error = TRUE)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::register_http_handlers(session, metadata = NULL)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+session$onSessionEnded(function() {
+        learnr:::session_stop_event(session)
+      })
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-Load-packages-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-Load-packages-code-editor`)), session)
+output$`tutorial-exercise-Load-packages-output` <- renderUI({
+  `tutorial-exercise-Load-packages-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-print-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-print-htasks-code-editor`)), session)
+output$`tutorial-exercise-print-htasks-output` <- renderUI({
+  `tutorial-exercise-print-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-plot-tasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-plot-tasks-code-editor`)), session)
+output$`tutorial-exercise-plot-tasks-output` <- renderUI({
+  `tutorial-exercise-plot-tasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-plot2-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-plot2-htasks-code-editor`)), session)
+output$`tutorial-exercise-plot2-htasks-output` <- renderUI({
+  `tutorial-exercise-plot2-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-Kh2-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-Kh2-htasks-code-editor`)), session)
+output$`tutorial-exercise-Kh2-htasks-output` <- renderUI({
+  `tutorial-exercise-Kh2-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-res-Kh2-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-res-Kh2-htasks-code-editor`)), session)
+output$`tutorial-exercise-res-Kh2-htasks-output` <- renderUI({
+  `tutorial-exercise-res-Kh2-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-plot-res-Kh2-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-plot-res-Kh2-htasks-code-editor`)), session)
+output$`tutorial-exercise-plot-res-Kh2-htasks-output` <- renderUI({
+  `tutorial-exercise-plot-res-Kh2-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-plot-cont-Kh2-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-plot-cont-Kh2-htasks-code-editor`)), session)
+output$`tutorial-exercise-plot-cont-Kh2-htasks-output` <- renderUI({
+  `tutorial-exercise-plot-cont-Kh2-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-AFC-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-AFC-htasks-code-editor`)), session)
+output$`tutorial-exercise-AFC-htasks-output` <- renderUI({
+  `tutorial-exercise-AFC-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-ev-AFC-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-ev-AFC-htasks-code-editor`)), session)
+output$`tutorial-exercise-ev-AFC-htasks-output` <- renderUI({
+  `tutorial-exercise-ev-AFC-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-viz-ev-AFC-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-viz-ev-AFC-htasks-code-editor`)), session)
+output$`tutorial-exercise-viz-ev-AFC-htasks-output` <- renderUI({
+  `tutorial-exercise-viz-ev-AFC-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-viz-supp-AFC-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-viz-supp-AFC-htasks-code-editor`)), session)
+output$`tutorial-exercise-viz-supp-AFC-htasks-output` <- renderUI({
+  `tutorial-exercise-viz-supp-AFC-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-ligne-AFC-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-ligne-AFC-htasks-code-editor`)), session)
+output$`tutorial-exercise-ligne-AFC-htasks-output` <- renderUI({
+  `tutorial-exercise-ligne-AFC-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-coord-ligne-AFC-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-coord-ligne-AFC-htasks-code-editor`)), session)
+output$`tutorial-exercise-coord-ligne-AFC-htasks-output` <- renderUI({
+  `tutorial-exercise-coord-ligne-AFC-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-qty-ligne-AFC-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-qty-ligne-AFC-htasks-code-editor`)), session)
+output$`tutorial-exercise-qty-ligne-AFC-htasks-output` <- renderUI({
+  `tutorial-exercise-qty-ligne-AFC-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-cos-ligne-AFC-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-cos-ligne-AFC-htasks-code-editor`)), session)
+output$`tutorial-exercise-cos-ligne-AFC-htasks-output` <- renderUI({
+  `tutorial-exercise-cos-ligne-AFC-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-ctr-ligne-AFC-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-ctr-ligne-AFC-htasks-code-editor`)), session)
+output$`tutorial-exercise-ctr-ligne-AFC-htasks-output` <- renderUI({
+  `tutorial-exercise-ctr-ligne-AFC-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-10-ctr-ligne-AFC-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-10-ctr-ligne-AFC-htasks-code-editor`)), session)
+output$`tutorial-exercise-10-ctr-ligne-AFC-htasks-output` <- renderUI({
+  `tutorial-exercise-10-ctr-ligne-AFC-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-contrib-ligne-AFC-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-contrib-ligne-AFC-htasks-code-editor`)), session)
+output$`tutorial-exercise-contrib-ligne-AFC-htasks-output` <- renderUI({
+  `tutorial-exercise-contrib-ligne-AFC-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-col-AFC-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-col-AFC-htasks-code-editor`)), session)
+output$`tutorial-exercise-col-AFC-htasks-output` <- renderUI({
+  `tutorial-exercise-col-AFC-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-col2-AFC-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-col2-AFC-htasks-code-editor`)), session)
+output$`tutorial-exercise-col2-AFC-htasks-output` <- renderUI({
+  `tutorial-exercise-col2-AFC-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-viz-col-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-viz-col-htasks-code-editor`)), session)
+output$`tutorial-exercise-viz-col-htasks-output` <- renderUI({
+  `tutorial-exercise-viz-col-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-qty-col-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-qty-col-htasks-code-editor`)), session)
+output$`tutorial-exercise-qty-col-htasks-output` <- renderUI({
+  `tutorial-exercise-qty-col-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-qty2-col-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-qty2-col-htasks-code-editor`)), session)
+output$`tutorial-exercise-qty2-col-htasks-output` <- renderUI({
+  `tutorial-exercise-qty2-col-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-viz-qty-col-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-viz-qty-col-htasks-code-editor`)), session)
+output$`tutorial-exercise-viz-qty-col-htasks-output` <- renderUI({
+  `tutorial-exercise-viz-qty-col-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-crt-col-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-crt-col-htasks-code-editor`)), session)
+output$`tutorial-exercise-crt-col-htasks-output` <- renderUI({
+  `tutorial-exercise-crt-col-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-viz-crt-col-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-viz-crt-col-htasks-code-editor`)), session)
+output$`tutorial-exercise-viz-crt-col-htasks-output` <- renderUI({
+  `tutorial-exercise-viz-crt-col-htasks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-viz-asym-htasks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-viz-asym-htasks-code-editor`)), session)
+output$`tutorial-exercise-viz-asym-htasks-output` <- renderUI({
+  `tutorial-exercise-viz-asym-htasks-result`()
+})
+</script>
+ <!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["header-attrs"]},{"type":"character","attributes":{},"value":["2.11"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pandoc"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["header-attrs.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.11"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["3.6.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/3.6.0"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery-3.6.0.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquerylib"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/cerulean.min.css"]},{"type":"character","attributes":{},"value":["<style>h1 {font-size: 34px;}\n       h1.title {font-size: 38px;}\n       h2 {font-size: 30px;}\n       h3 {font-size: 24px;}\n       h4 {font-size: 18px;}\n       h5 {font-size: 16px;}\n       h6 {font-size: 12px;}\n       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}\n       pre:not([class]) { background-color: white }<\/style>"]},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.11"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["pagedtable"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pagedtable-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/pagedtable.js"]},{"type":"character","attributes":{},"value":["css/pagedtable.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.11"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["textmate.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.11"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-format"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmarkdown/templates/tutorial/resources"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-format.js"]},{"type":"character","attributes":{},"value":["tutorial-format.css","rstudio-theme.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["3.6.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/3.6.0"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery-3.6.0.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquerylib"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["navigation"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/navigation-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tabsets.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.11"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["default.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.11"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["3.6.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/3.6.0"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery-3.6.0.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquerylib"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["font-awesome"]},{"type":"character","attributes":{},"value":["5.1.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/fontawesome"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/all.css","css/v4-shims.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.11"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootbox"]},{"type":"character","attributes":{},"value":["4.4.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/bootbox"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["bootbox.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["idb-keyvalue"]},{"type":"character","attributes":{},"value":["3.2.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/idb-keyval"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["idb-keyval-iife-compat.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]}]}
+</script>
+<!--/html_preserve-->
+<!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="execution_dependencies">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124]}},"value":[{"type":"character","attributes":{},"value":["abind","assertthat","backports","base","base64enc","broom","bslib","car","carData","cellranger","checkmate","cli","cluster","colorspace","compiler","corrplot","crayon","curl","data.table","datasets","DBI","dbplyr","digest","dplyr","DT","ellipsis","evaluate","factoextra","FactoMineR","fansi","farver","fastmap","flashClust","forcats","foreign","Formula","fs","generics","ggplot2","ggpubr","ggrepel","ggsignif","glue","graphics","grDevices","grid","gridExtra","gtable","haven","highr","Hmisc","hms","htmlTable","htmltools","htmlwidgets","httpuv","httr","jpeg","jquerylib","jsonlite","knitr","labeling","Lahman","later","lattice","latticeExtra","leaps","learnr","lifecycle","lubridate","magrittr","markdown","MASS","Matrix","methods","mime","modelr","munsell","nnet","nycflights13","openxlsx","pillar","pkgconfig","png","promises","purrr","R6","RColorBrewer","Rcpp","readr","readxl","reprex","rio","rlang","rmarkdown","rpart","rprojroot","rstatix","rstudioapi","rvest","sass","scales","scatterplot3d","shiny","splines","stats","stringi","stringr","survival","tibble","tidyr","tidyselect","tidyverse","tools","tzdb","utf8","utils","vctrs","withr","xfun","xml2","xtable","yaml","zip"]},{"type":"character","attributes":{},"value":["1.4-5","0.2.1","1.2.1","4.1.1","0.1-3","0.7.9","0.3.1","3.0-11","3.0-4","1.1.0","2.0.0","3.0.1","2.1.2","2.0-2","4.1.1","0.90","1.4.1","4.3.2","1.14.2","4.1.1","1.1.1","2.1.1","0.6.28","1.0.7","0.19","0.3.2","0.14","1.0.7","2.4","0.5.0","2.1.0","1.1.0","1.01-2","0.5.1","0.8-81","1.2-4","1.5.0","0.1.0","3.3.5","0.4.0","0.9.1","0.6.3","1.4.2","4.1.1","4.1.1","4.1.1","2.3","0.3.0","2.4.3","0.9","4.6-0","1.1.1","2.3.0","0.5.2","1.5.4","1.6.3","1.4.2","0.1-9","0.1.4","1.7.2","1.36","0.4.2","9.0-0","1.3.0","0.20-44","0.6-29","3.1","0.10.1","1.0.1","1.8.0","2.0.1","1.1","7.3-54","1.3-4","4.1.1","0.12","0.1.8","0.5.0","7.3-16","1.0.2","4.2.4","1.6.4","2.0.3","0.1-7","1.2.0.1","0.3.4","2.5.1","1.1-2","1.0.7","2.0.2","1.3.1","2.0.1","0.5.27","0.4.11","2.11","4.1-15","2.0.2","0.7.0","0.13","1.0.2","0.4.0","1.1.1","0.3-41","1.7.1","4.1.1","4.1.1","1.7.5","1.4.0","3.2-11","3.1.5","1.1.4","1.1.1","1.3.1","4.1.1","0.1.2","1.2.2","4.1.1","0.3.8","2.4.2","0.26","1.3.2","1.8-4","2.2.1","2.2.0"]}]}]}
+</script>
+<!--/html_preserve-->
+</div>
+</div>
+</div>
+
+</div> <!-- topics -->
+
+<div class="topicsContainer">
+<div class="topicsPositioner">
+<div class="band">
+<div class="bandContent topicsListContainer">
+
+<!-- begin doc-metadata -->
+<div id="doc-metadata">
+<h2 class="title toc-ignore" style="display:none;">Lab: AFC</h2>
+</div>
+<!-- end doc-metadata -->
+
+</div> <!-- bandContent.topicsListContainer -->
+</div> <!-- band -->
+</div> <!-- topicsPositioner -->
+</div> <!-- topicsContainer -->
+
+
+</div> <!-- bandContent page -->
+</div> <!-- pageContent band -->
+
+
+
+
+<script>
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+
+</body>
+
+</html>
